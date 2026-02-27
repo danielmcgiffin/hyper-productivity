@@ -16,7 +16,15 @@ fi
 
 echo "Building Super Productivity..."
 npm install --prefer-offline
-npx ng build --configuration production
+
+# Codespaces can kill high-parallel Angular builds (shows up as "Terminated"/esbuild deadlock).
+# Use conservative defaults and retry once with single worker if needed.
+export NODE_OPTIONS="${NODE_OPTIONS:---max-old-space-size=4096}"
+export NG_BUILD_MAX_WORKERS="${NG_BUILD_MAX_WORKERS:-2}"
+if ! npx ng build --configuration production; then
+  echo "Initial build failed; retrying with NG_BUILD_MAX_WORKERS=1..."
+  NG_BUILD_MAX_WORKERS=1 npx ng build --configuration production
+fi
 
 # Detect output directory
 OUT_DIR="dist/super-productivity/browser"
