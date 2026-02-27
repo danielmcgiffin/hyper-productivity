@@ -1,0 +1,104 @@
+name: 'Monthly Upstream Sync Check'
+
+on:
+  schedule:
+    - cron: '0 9 1 * *' # 09:00 UTC on the first day of each month
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check-upstream:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 0
+
+      - name: Configure upstream remote
+        run: |
+          if git remote get-url upstream >/dev/null 2>&1; then
+            git remote set-url upstream https://github.com/super-productivity/super-productivity.git
+          else
+            git remote add upstream https://github.com/super-productivity/super-productivity.git
+          fi
+
+      - name: Check upstream status
+        id: check
+        run: |
+          chmod +x scripts/check-upstream-updates.sh
+          scripts/check-upstream-updates.sh \
+            --local-branch master \
+            --upstream-remote upstream \
+            --upstream-branch master \
+            --github-output "$GITHUB_OUTPUT"
+
+      - name: Ensure tracking label exists
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh label create upstream-sync-check \
+            --color "f9d0c4" \
+            --description "Automated monthly check for upstream fork drift" || true
+
+      - name: Open or update tracking issue (behind upstream)
+        if: steps.check.outputs.behind != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TITLE="Monthly upstream sync check"
+          BODY=$(cat <<EOF
+          This fork is currently behind upstream and should be synced.
+
+          - Local ref: \`${{ steps.check.outputs.local_ref }}\`
+          - Upstream ref: \`${{ steps.check.outputs.upstream_ref }}\`
+          - Behind: **${{ steps.check.outputs.behind }}** commit(s)
+          - Ahead: **${{ steps.check.outputs.ahead }}** commit(s)
+          - Local SHA: \`${{ steps.check.outputs.local_sha }}\`
+          - Upstream SHA: \`${{ steps.check.outputs.upstream_sha }}\`
+
+          Suggested update commands:
+
+          \`\`\`bash
+          git checkout master
+          git fetch upstream
+          git merge upstream/master
+          git push origin master
+          \`\`\`
+
+          Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          EOF
+          )
+
+          ISSUE_NUMBER=$(gh issue list \
+            --state open \
+            --label upstream-sync-check \
+            --json number,title \
+            --jq 'map(select(.title=="Monthly upstream sync check")) | .[0].number // empty')
+
+          if [[ -n "$ISSUE_NUMBER" ]]; then
+            gh issue edit "$ISSUE_NUMBER" --title "$TITLE" --body "$BODY"
+          else
+            gh issue create --title "$TITLE" --body "$BODY" --label upstream-sync-check
+          fi
+
+      - name: Close tracking issue (up to date)
+        if: steps.check.outputs.behind == '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ISSUE_NUMBER=$(gh issue list \
+            --state open \
+            --label upstream-sync-check \
+            --json number,title \
+            --jq 'map(select(.title=="Monthly upstream sync check")) | .[0].number // empty')
+
+          if [[ -n "$ISSUE_NUMBER" ]]; then
+            gh issue comment "$ISSUE_NUMBER" \
+              --body "Upstream check is in sync. Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            gh issue close "$ISSUE_NUMBER"
+          fi

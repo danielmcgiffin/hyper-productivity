@@ -8,3 +8,7 @@ bucket_name = "sp-sync"
 
 [vars]
 # Set actual token via `wrangler secret put AUTH_TOKEN`
+# Calendar proxy sources (set via secrets):
+# wrangler secret put ICAL_OUTLOOK_URL
+# wrangler secret put ICAL_CURSUS_URL
+# wrangler secret put ICAL_PERSONAL_URL
