@@ -6,11 +6,12 @@ import {
 } from '../sync-providers/provider.interface';
 import { SyncProviderId } from '../sync-providers/provider.const';
 
-/** Provider IDs that use file-based operation sync (WebDAV, Dropbox, LocalFile) */
+/** Provider IDs that use file-based operation sync (WebDAV, Dropbox, LocalFile, CloudSync) */
 const FILE_BASED_PROVIDER_IDS: Set<SyncProviderId> = new Set([
   SyncProviderId.WebDAV,
   SyncProviderId.Dropbox,
   SyncProviderId.LocalFile,
+  SyncProviderId.CloudSync,
 ]);
 
 /**
@@ -28,7 +29,7 @@ export const isOperationSyncCapable = (
 
 /**
  * Type guard to check if a provider uses file-based operation sync.
- * File-based providers (WebDAV, Dropbox, LocalFile) use file storage for sync.
+ * File-based providers (WebDAV, Dropbox, LocalFile, CloudSync) use file storage for sync.
  */
 export const isFileBasedProvider = (
   provider: SyncProviderServiceInterface<SyncProviderId>,

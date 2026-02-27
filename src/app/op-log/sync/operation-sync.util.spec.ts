@@ -1,4 +1,8 @@
-import { isOperationSyncCapable, syncOpToOperation } from './operation-sync.util';
+import {
+  isFileBasedProvider,
+  isOperationSyncCapable,
+  syncOpToOperation,
+} from './operation-sync.util';
 import {
   SyncProviderServiceInterface,
   OperationSyncCapable,
@@ -8,6 +12,32 @@ import { SyncProviderId } from '../sync-providers/provider.const';
 import { ActionType, OpType } from '../core/operation.types';
 
 describe('operation-sync utility', () => {
+  describe('isFileBasedProvider', () => {
+    it('should return true for file-based providers including CloudSync', () => {
+      const fileBasedProviderIds = [
+        SyncProviderId.WebDAV,
+        SyncProviderId.Dropbox,
+        SyncProviderId.LocalFile,
+        SyncProviderId.CloudSync,
+      ];
+
+      for (const providerId of fileBasedProviderIds) {
+        const provider = {
+          id: providerId,
+        } as SyncProviderServiceInterface<SyncProviderId>;
+        expect(isFileBasedProvider(provider)).toBeTrue();
+      }
+    });
+
+    it('should return false for non-file-based providers', () => {
+      const provider = {
+        id: SyncProviderId.SuperSync,
+      } as SyncProviderServiceInterface<SyncProviderId>;
+
+      expect(isFileBasedProvider(provider)).toBeFalse();
+    });
+  });
+
   describe('isOperationSyncCapable', () => {
     it('should return true for provider with supportsOperationSync = true', () => {
       const provider = {
