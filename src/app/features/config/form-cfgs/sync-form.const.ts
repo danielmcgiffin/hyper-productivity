@@ -130,6 +130,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           { label: 'SuperSync (Beta)', value: SyncProviderId.SuperSync },
           { label: SyncProviderId.Dropbox, value: SyncProviderId.Dropbox },
           { label: 'WebDAV (experimental)', value: SyncProviderId.WebDAV },
+          { label: 'CloudSync (R2/S3)', value: SyncProviderId.CloudSync },
           ...(IS_ELECTRON || IS_ANDROID_WEB_VIEW
             ? [
                 {
@@ -215,6 +216,54 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         baseUrlDescription:
           '* https://your-next-cloud/nextcloud/remote.php/dav/files/yourUserName/',
       }),
+    },
+
+    // CloudSync provider form fields
+    {
+      hideExpression: (m, v, field) =>
+        field?.parent?.model.syncProvider !== SyncProviderId.CloudSync,
+      resetOnHide: false,
+      key: 'cloudSync',
+      fieldGroup: [
+        {
+          type: 'tpl',
+          templateOptions: {
+            tag: 'p',
+            text: 'Sync via a Cloudflare Worker + R2 (or any compatible HTTP endpoint with ETag support). Deploy your own worker for full data ownership.',
+          },
+        },
+        {
+          key: 'baseUrl',
+          type: 'input',
+          templateOptions: {
+            label: 'Worker URL',
+            description: '* https://sp-sync.your-subdomain.workers.dev',
+          },
+          expressions: {
+            'props.required': (field: FormlyFieldConfig) =>
+              field?.parent?.parent?.model?.syncProvider === SyncProviderId.CloudSync,
+          },
+        },
+        {
+          key: 'authToken',
+          type: 'input',
+          templateOptions: {
+            type: 'password',
+            label: 'Auth Token',
+          },
+          expressions: {
+            'props.required': (field: FormlyFieldConfig) =>
+              field?.parent?.parent?.model?.syncProvider === SyncProviderId.CloudSync,
+          },
+        },
+        {
+          key: 'syncFolderPath',
+          type: 'input',
+          templateOptions: {
+            label: 'Sync Folder Path',
+          },
+        },
+      ],
     },
 
     // Dropbox provider authentication

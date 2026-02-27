@@ -226,5 +226,11 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     localFileSync: {
       syncFolderPath: '',
     },
+
+    cloudSync: {
+      baseUrl: null,
+      authToken: null,
+      syncFolderPath: 'super-productivity',
+    },
   },
 } as const;

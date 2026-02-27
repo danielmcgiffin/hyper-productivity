@@ -134,6 +134,12 @@ export interface LocalFileSyncConfig {
   syncFolderPath?: string | null;
 }
 
+export interface CloudSyncConfig {
+  baseUrl?: string | null;
+  authToken?: string | null;
+  syncFolderPath?: string | null;
+}
+
 export type LocalBackupConfig = Readonly<{
   isEnabled: boolean;
 }>;
@@ -175,6 +181,8 @@ export type SyncConfig = Readonly<{
   superSync?: SuperSyncConfig;
   /* NOTE: view model for form only*/
   localFileSync?: LocalFileSyncConfig;
+  /* NOTE: view model for form only*/
+  cloudSync?: CloudSyncConfig;
 }>;
 
 export type ScheduleConfig = Readonly<{

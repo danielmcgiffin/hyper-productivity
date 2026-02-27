@@ -4,6 +4,7 @@ export enum SyncProviderId {
   'WebDAV' = 'WebDAV',
   'LocalFile' = 'LocalFile',
   'SuperSync' = 'SuperSync',
+  'CloudSync' = 'CloudSync',
 }
 
 /**

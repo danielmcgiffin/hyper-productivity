@@ -22,12 +22,19 @@ const PROP_MAP_TO_FORM: Record<SyncProviderId, keyof SyncConfig | null> = {
   [SyncProviderId.WebDAV]: 'webDav',
   [SyncProviderId.SuperSync]: 'superSync',
   [SyncProviderId.Dropbox]: null,
+  [SyncProviderId.CloudSync]: 'cloudSync',
 };
 
 // Ensures all required fields have empty string defaults to prevent undefined/null errors
 // when providers expect string values (e.g., WebDAV API calls fail with undefined URLs)
 // Fields that should never be logged, even in development
-const SENSITIVE_FIELDS = ['password', 'encryptKey', 'accessToken', 'refreshToken'];
+const SENSITIVE_FIELDS = [
+  'password',
+  'encryptKey',
+  'accessToken',
+  'refreshToken',
+  'authToken',
+];
 
 /**
  * Redacts sensitive fields from an object for safe logging.
@@ -80,6 +87,12 @@ const PROVIDER_FIELD_DEFAULTS: Record<
     encryptKey: '',
   },
   [SyncProviderId.Dropbox]: {
+    encryptKey: '',
+  },
+  [SyncProviderId.CloudSync]: {
+    baseUrl: '',
+    authToken: '',
+    syncFolderPath: 'super-productivity',
     encryptKey: '',
   },
 };
@@ -155,6 +168,10 @@ export class SyncConfigService {
           ...DEFAULT_GLOBAL_CONFIG.sync.localFileSync,
           ...syncCfg?.localFileSync,
         },
+        cloudSync: {
+          ...DEFAULT_GLOBAL_CONFIG.sync.cloudSync,
+          ...syncCfg?.cloudSync,
+        },
       };
 
       // If no provider is active, return base config with empty encryption key
@@ -202,6 +219,7 @@ export class SyncConfigService {
         localFileSync: DEFAULT_GLOBAL_CONFIG.sync.localFileSync,
         webDav: DEFAULT_GLOBAL_CONFIG.sync.webDav,
         superSync: DEFAULT_GLOBAL_CONFIG.sync.superSync,
+        cloudSync: DEFAULT_GLOBAL_CONFIG.sync.cloudSync,
       };
 
       // Add current provider config if applicable
@@ -269,7 +287,8 @@ export class SyncConfigService {
     // Split settings into public (global config) and private (credentials/secrets)
     // to maintain security boundaries - credentials never go to global config
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { encryptKey, webDav, localFileSync, superSync, ...globalConfig } = newSettings;
+    const { encryptKey, webDav, localFileSync, superSync, cloudSync, ...globalConfig } =
+      newSettings;
     // Provider-specific settings (URLs, credentials) must be stored securely
     if (providerId) {
       await this._updatePrivateConfig(providerId, newSettings);

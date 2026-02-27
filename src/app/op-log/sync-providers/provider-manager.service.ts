@@ -23,6 +23,7 @@ import { environment } from '../../../environments/environment';
 
 // Import providers
 import { Dropbox } from './file-based/dropbox/dropbox';
+import { CloudSync } from './file-based/cloud-sync/cloud-sync';
 import { Webdav } from './file-based/webdav/webdav';
 import { SuperSyncProvider } from './super-sync/super-sync';
 import { LocalFileSyncElectron } from './file-based/local-file/local-file-sync-electron';
@@ -54,6 +55,9 @@ const SYNC_PROVIDERS: SyncProviderServiceInterface<SyncProviderId>[] = [
     environment.production ? undefined : `/DEV`,
   ) as SyncProviderServiceInterface<SyncProviderId>,
   new SuperSyncProvider(
+    environment.production ? undefined : `/DEV`,
+  ) as SyncProviderServiceInterface<SyncProviderId>,
+  new CloudSync(
     environment.production ? undefined : `/DEV`,
   ) as SyncProviderServiceInterface<SyncProviderId>,
   ...(IS_ELECTRON
