@@ -8,8 +8,8 @@ jobs:
   auto-publish-google-play:
     runs-on: ubuntu-latest
 
-    # Only run for actual releases, not pre-releases
-    if: '!github.event.release.prerelease'
+    # Disabled for this fork: Google Play auto-promotion is not used.
+    if: ${{ false }}
 
     steps:
       - name: Harden Runner

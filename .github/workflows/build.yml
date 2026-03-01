@@ -21,6 +21,8 @@ jobs:
           prerelease: ${{ contains(github.ref, 'RC') || contains(github.ref, 'beta') || contains(github.ref, 'alpha') }}
 
   linux-bin-and-snap-release:
+    # Disabled for this fork: Linux Snap publishing is not used.
+    if: ${{ false }}
     runs-on: ubuntu-latest
     env:
       SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}

@@ -11,7 +11,8 @@ jobs:
     env:
       SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.SNAPCRAFT_STORE_CREDENTIALS }}
 
-    if: '!github.event.release.prerelease'
+    # Disabled for this fork: Snap Store publishing is not used.
+    if: ${{ false }}
 
     steps:
       - name: Install Snapcraft
