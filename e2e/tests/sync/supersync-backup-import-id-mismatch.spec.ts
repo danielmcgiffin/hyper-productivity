@@ -290,7 +290,8 @@ test.describe('@supersync Backup Import ID Mismatch Bug', () => {
       let serverOpId: string | null = null;
       try {
         const dbResult = execSync(
-          `docker exec super-productivity-db-1 psql -U supersync -d supersync_db -t -A -c "${dbQuery}"`,
+          `docker compose -f docker-compose.yaml -f docker-compose.supersync.yaml ` +
+            `exec -T db psql -U supersync -d supersync_db -t -A -c "${dbQuery}"`,
           { encoding: 'utf8' },
         ).trim();
 
@@ -312,9 +313,9 @@ test.describe('@supersync Backup Import ID Mismatch Bug', () => {
       console.log(`[ID Mismatch Test]   Local ID:  ${localOpId}`);
       console.log(`[ID Mismatch Test]   Server ID: ${serverOpId}`);
 
-      // BUG: The IDs are DIFFERENT because uploadSnapshot doesn't send op.id
-      // When the bug is FIXED, this assertion should PASS (IDs match)
-      // Currently, this test FAILS because the IDs are different
+      // Regression check: IDs must match. If they differ, the snapshot upload path
+      // did not preserve the client operation ID and backup-import state can be
+      // re-applied incorrectly on subsequent syncs.
       expect(serverOpId).toBeTruthy();
       expect(
         localOpId,
